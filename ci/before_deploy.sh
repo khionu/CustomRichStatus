@@ -4,7 +4,9 @@ set -ex
 
 main() {
     local src=$(pwd) \
-          stage=
+          stage=     \
+          bin=target/$TARGET/release/custom_rich_status
+
 
     case $TRAVIS_OS_NAME in
         linux)
@@ -15,12 +17,16 @@ main() {
             ;;
     esac
 
+    if [[ $TARGET = *"windows"* ]]
+    then
+        bin="$bin.exe"
+    fi
+
     test -f Cargo.lock || cargo generate-lockfile
 
     cross rustc --bin custom_rich_status --target $TARGET --release -- -C lto
 
-    # Eating copy error on matching either Linux or Windows binary
-    cp target/$TARGET/release/custom_rich_status{,.exe} $stage/ || true
+    cp $bin $stage/
     cp config.yml $stage/
     cp -r presets/ $stage/
 
