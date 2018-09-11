@@ -10,7 +10,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load() -> Config {
+    pub fn load() -> Result<Config, String> {
         let config_file = File::open("config.yml");
 
         if let Err(_err) = config_file {
@@ -18,9 +18,13 @@ impl Config {
             directory formatted as in the documentation");
         }
 
-        let config: Config = serde_yaml::from_reader(
-            BufReader::new(config_file.unwrap())).unwrap();
+        let config = serde_yaml::from_reader(
+            BufReader::new(config_file.unwrap()));
 
-        config
+        if let Err(err) = config {
+            return Err(format!("Error parsing preset: either invalid YAML or invalid fields"));
+        }
+
+        Ok(config.unwrap())
     }
 }

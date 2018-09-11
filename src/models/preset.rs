@@ -27,10 +27,13 @@ impl Preset {
             return Err(format!("Error opening preset: {}", err.description()));
         }
 
-        // TODO: Validate format
-        let preset: Preset = serde_yaml::from_reader(
-            BufReader::new(preset_file.unwrap())).unwrap();
+        let preset = serde_yaml::from_reader(
+            BufReader::new(preset_file.unwrap()));
 
-        Ok(preset)
+        if let Err(err) = preset {
+            return Err(format!("Error parsing preset: either invalid YAML or invalid fields"));
+        }
+
+        Ok(preset.unwrap())
     }
 }
