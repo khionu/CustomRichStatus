@@ -1,4 +1,3 @@
-use std;
 use std::error::Error;
 use std::io;
 use std::io::Write;
@@ -52,10 +51,13 @@ impl AppState {
         }
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> String {
         self.state.rpc.start();
 
-        println!("{}", set::run(self.initial_dto.clone(), &mut self.state));
+        match set::run(self.initial_dto.clone(), &mut self.state) {
+            Ok(msg) => println!("{}", msg),
+            Err(err) => panic!("{}", err)
+        }
 
         loop {
             let mut buffer = String::new();
@@ -66,18 +68,21 @@ impl AppState {
 
             io::stdin().read_line(&mut buffer).unwrap();
 
-            let result = self.parse_and_execute(buffer.trim_right());
-
-            println!("{}", result);
+            match self.parse_and_execute(buffer.trim_right()) {
+                Ok(result) => println!("{}", result),
+                Err(err) => return err,
+            }
         }
     }
 
-    fn parse_and_execute(&mut self, input: &str) -> String {
+    // Result::Ok means, error or not, we can continue
+    // Result::Err is only on unrecoverable results
+    fn parse_and_execute(&mut self, input: &str) -> Result<String, String> {
         let matches_result =
             self.cmd_app.clone().get_matches_from_safe(QuotedParts::from(&("> ".to_owned() + input)));
 
         if let Err(err) = matches_result {
-            return format!("Error parsing arguments: {}", err.description());
+            return Ok(format!("Error parsing arguments: {}", err.description()));
         }
 
         let matches = matches_result.unwrap();
@@ -85,7 +90,7 @@ impl AppState {
         let sub_name = matches.subcommand_name();
 
         if let None = sub_name {
-            return String::from("No command provided. Run \"help\" for more information");
+            return Ok(String::from("No command provided. Run \"help\" for more information"));
         }
 
         let cmd = matches.subcommand().1.unwrap();
@@ -93,8 +98,8 @@ impl AppState {
         macro_rules! load_command {
             [ $ns:ident ] => {
                 match $ns::parse(cmd) {
-                    Err(err) => return format!("Error parsing command: {}", err),
                     Ok(args) => $ns::run(args, &mut self.state),
+                    Err(err) => Ok(format!("Error parsing command: {}", err)),
                 }
             }
         }
@@ -105,9 +110,8 @@ impl AppState {
                 std::process::exit(0);
             },
             "set" => { load_command![set] },
-            &_ => String::from("Command not found. Please check your syntax"),
+            &_ => panic!("DEVELOPER FAILED TO REGISTER COMMAND")
         }
-
     }
 
     fn load_initial_dto(preset_name: &str) -> Result<ActivityDto, String>  {

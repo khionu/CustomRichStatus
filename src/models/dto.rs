@@ -4,7 +4,7 @@ use models::preset::Preset;
 use utils::hms_to_u64;
 use utils::AddOrSub::*;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ActivityDto {
     pub details: Option<String>,
     pub state: Option<String>,
