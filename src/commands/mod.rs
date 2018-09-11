@@ -3,6 +3,7 @@ use clap::App;
 // Commands
 
 pub mod set;
+pub mod quit;
 
 // End Commands
 

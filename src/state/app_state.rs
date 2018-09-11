@@ -105,10 +105,7 @@ impl AppState {
         }
 
         match matches.subcommand_name().unwrap() {
-            "quit" => {
-                println!("Buh-bye! o/");
-                std::process::exit(0);
-            },
+            "quit" => { load_command![quit] },
             "set" => { load_command![set] },
             &_ => panic!("DEVELOPER FAILED TO REGISTER COMMAND")
         }
