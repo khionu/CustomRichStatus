@@ -1,12 +1,10 @@
 [package]
-name = "custom_rich_discord_status"
+name = "custom_rich_status"
 version = "0.1.0"
 authors = ["Khionu Sybiern <dev@khionu.net>"]
 
 [dependencies]
 discord-rpc-client = "^0.2"
-simplelog = "^0.5.0"
-getopts = "0.2"
 clap = "2"
 serde = "1.0"
 serde_yaml = "0.8"

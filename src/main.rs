@@ -1,6 +1,5 @@
 extern crate chrono;
 extern crate discord_rpc_client;
-extern crate getopts;
 extern crate serde_yaml;
 #[macro_use]
 extern crate serde_derive;
