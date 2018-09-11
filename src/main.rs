@@ -9,8 +9,7 @@ extern crate quoted_strings;
 extern crate clap;
 
 mod commands;
-mod configuration;
-mod dto;
+mod models;
 mod state;
 mod utils;
 

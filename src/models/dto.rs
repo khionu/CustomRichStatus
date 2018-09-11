@@ -1,6 +1,6 @@
 use discord_rpc_client::models::Activity;
 
-use configuration::preset::Preset;
+use models::preset::Preset;
 use utils::hms_to_u64;
 use utils::AddOrSub::*;
 

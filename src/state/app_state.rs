@@ -9,8 +9,7 @@ use quoted_strings::QuotedParts;
 
 use commands;
 use commands::*;
-use configuration::{config::Config, preset::Preset};
-use dto::ActivityDto;
+use models::{config::Config, preset::Preset, dto::ActivityDto};
 
 pub struct AppState {
     initial_dto: ActivityDto,

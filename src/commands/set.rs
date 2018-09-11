@@ -1,9 +1,7 @@
-use dto::ActivityDto;
 use state::app_state::InternalState;
-use configuration::preset::Preset;
 use clap::ArgMatches;
-use utils::AddOrSub;
-use utils::hms_to_u64;
+use utils::{AddOrSub, hms_to_u64};
+use models::{preset::Preset, dto::ActivityDto};
 
 pub fn run(dto: ActivityDto, state: &mut InternalState) -> String {
     match state.rpc.set_activity(|a|dto.apply_to_activity(a)) {
