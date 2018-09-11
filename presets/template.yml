@@ -1,8 +1,8 @@
-details: "A plaintext string"
-state: "A plaintext string"
-large_image: image_asset_key
-small_image: image_asset_key
-large_text: "A plaintext string"
-small_text: "A plaintext string"
-start: HH:MM:SS
-end: HH:MM:SS
+# details: "A plaintext string"
+# state: "A plaintext string"
+# large_image: image_asset_key
+# small_image: image_asset_key
+# large_text: "A plaintext string"
+# small_text: "A plaintext string"
+# start: HH:MM:SS
+# end: HH:MM:SS
