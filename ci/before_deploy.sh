@@ -28,7 +28,9 @@ main() {
 
     cp $bin $stage/
     cp config.yml $stage/
-    cp -r presets/ $stage/
+
+    mkdir $stage/presets/
+    cp presets/* $stage/presets/
 
     cp LICENCE $stage/
     cp README.md $stage/
