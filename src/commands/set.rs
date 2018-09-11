@@ -4,6 +4,10 @@ use utils::{AddOrSub, hms_to_u64};
 use models::{preset::Preset, dto::ActivityDto};
 
 pub fn run(dto: ActivityDto, state: &mut InternalState) -> Result<String, String> {
+    if dto == ActivityDto::default() {
+        return Err(String::from("Skipping empty status update"));
+    }
+
     match state.rpc.set_activity(|a|dto.apply_to_activity(a)) {
         Ok(_p) => Ok(String::from("Status successfully updated")),
         Err(err) => Err(format!("Failed to set status: {}", err))
