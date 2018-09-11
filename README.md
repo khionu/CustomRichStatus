@@ -1,5 +1,7 @@
 # Custom Rich Status
 #### A repl command line for updating a Discord Rich Presence
+[![GitHub license](https://img.shields.io/github/license/khionu/CustomRichStatus.svg)](https://github.com/khionu/CustomRichStatus/blob/master/LICENCE)
+[![Build Status](https://travis-ci.com/khionu/CustomRichStatus.svg?branch=master)](https://travis-ci.com/khionu/CustomRichStatus)
 
 ## Getting Started
 1) Head over to the [Discord Developer Portal](https://discordapp.com/developers) and create an Application.
