@@ -5,7 +5,7 @@ use models::{preset::Preset, dto::ActivityDto};
 
 pub fn run(dto: ActivityDto, state: &mut InternalState) -> Result<String, String> {
     if dto == ActivityDto::default() {
-        return Err(String::from("Skipping empty status update"));
+        return Ok(String::from("Skipping empty status update"));
     }
 
     match state.rpc.set_activity(|a|dto.apply_to_activity(a)) {
