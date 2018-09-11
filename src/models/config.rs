@@ -21,7 +21,7 @@ impl Config {
         let config = serde_yaml::from_reader(
             BufReader::new(config_file.unwrap()));
 
-        if let Err(err) = config {
+        if let Err(_err) = config {
             return Err(format!("Error parsing preset: either invalid YAML or invalid fields"));
         }
 

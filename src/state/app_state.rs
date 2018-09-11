@@ -23,7 +23,13 @@ pub struct InternalState {
 
 impl AppState {
     pub fn new() -> AppState {
-        let config = Config::load();
+        let config_result = Config::load();
+
+        if let Err(err) = config_result {
+            panic!("{}", err);
+        }
+
+        let config = config_result.unwrap();
 
         let rpc = DiscordRPC::new(config.client_id)
             .expect("Failed to create Discord RPC client");

@@ -30,7 +30,7 @@ impl Preset {
         let preset = serde_yaml::from_reader(
             BufReader::new(preset_file.unwrap()));
 
-        if let Err(err) = preset {
+        if let Err(_err) = preset {
             return Err(format!("Error parsing preset: either invalid YAML or invalid fields"));
         }
 
