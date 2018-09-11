@@ -1,6 +1,6 @@
 [package]
 name = "custom_rich_status"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Khionu Sybiern <dev@khionu.net>"]
 
 [dependencies]
