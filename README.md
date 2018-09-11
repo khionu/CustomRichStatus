@@ -7,4 +7,4 @@
 3) Add your assets to [this section](https://i.imgur.com/nqoSRFK.png) of your Application.
   
 _Optional: Make presets based on `presets/template.yml`. All fields are optional._  
-_Hint: You can set the preset to load on start in the config by the `preset` key_
+_Hint: You can set the preset to load on start in the config by the `preset` key._
