@@ -56,28 +56,12 @@ impl ActivityDto {
 
     pub fn apply_to_activity(self, activity: Activity) -> Activity {
         let mut a = activity;
-        let dto = self;
+        let dto = &self;
 
         macro_rules! flat_prop_add {
             [ $prop:ident ] => {
-                if let Some($prop) = dto.$prop {
-                    a = a.$prop($prop);
-                }
-            }
-        };
-
-        macro_rules! asst_prop_add {
-            [ $prop:ident ] => {
-                if let Some($prop) = dto.$prop {
-                    a = a.assets(|assets| assets.$prop($prop));
-                }
-            }
-        };
-
-        macro_rules! time_prop_add {
-            [ $prop:ident ] => {
-                if let Some($prop) = dto.$prop {
-                    a = a.timestamps(|ts| ts.$prop($prop));
+                if let Some(ref $prop) = dto.$prop {
+                    a = a.$prop($prop.clone());
                 }
             }
         };
@@ -85,13 +69,41 @@ impl ActivityDto {
         flat_prop_add![details];
         flat_prop_add![state];
 
-        asst_prop_add![large_image];
-        asst_prop_add![small_image];
-        asst_prop_add![large_text];
-        asst_prop_add![small_text];
+        a = a.assets(|ass| {
+            let mut assets = ass;
 
-        time_prop_add![start];
-        time_prop_add![end];
+            macro_rules! asst_prop_add {
+                [ $prop:ident ] => {
+                    if let Some(ref $prop) = dto.$prop {
+                        assets = assets.$prop($prop.clone());
+                    }
+                }
+            };
+
+            asst_prop_add![large_image];
+            asst_prop_add![small_image];
+            asst_prop_add![large_text];
+            asst_prop_add![small_text];
+
+            assets
+        });
+
+        a = a.timestamps(|timestamp| {
+            let mut ts = timestamp;
+
+            macro_rules! time_prop_add {
+                [ $prop:ident ] => {
+                    if let Some(ref $prop) = dto.$prop {
+                        ts = ts.$prop($prop.clone());
+                    }
+                }
+            };
+
+            time_prop_add![start];
+            time_prop_add![end];
+
+            ts
+        });
 
         a
     }
