@@ -88,7 +88,7 @@ impl AppState {
         let sub_name = matches.subcommand_name();
 
         if let None = sub_name {
-            return Ok(String::from("No command provided. Run \"help\" for more information"));
+            panic!("DEVELOPER ERROR: CREATED OPTIONS OUTSIDE OF COMMAND")
         }
 
         let cmd = matches.subcommand().1.unwrap();
@@ -105,7 +105,7 @@ impl AppState {
         match matches.subcommand_name().unwrap() {
             "quit" => { load_command![quit] },
             "set" => { load_command![set] },
-            &_ => panic!("DEVELOPER FAILED TO REGISTER COMMAND")
+            &_ => panic!("DEVELOPER ERROR: FAILED TO REGISTER COMMAND")
         }
     }
 
