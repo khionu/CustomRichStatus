@@ -2,15 +2,16 @@ use state::app_state::InternalState;
 use clap::ArgMatches;
 use utils::{AddOrSub, hms_to_u64};
 use models::{preset::Preset, dto::ActivityDto};
+use commands::CmdResult;
 
-pub fn run(dto: ActivityDto, state: &mut InternalState) -> Result<String, String> {
+pub fn run(dto: ActivityDto, state: &mut InternalState) -> CmdResult {
     if dto == ActivityDto::default() {
-        return Ok(String::from("Skipping empty status update"));
+        return CmdResult::Ok(String::from("Skipping empty status update"));
     }
 
     match state.rpc.set_activity(|a|dto.apply_to_activity(a)) {
-        Ok(_p) => Ok(String::from("Status successfully updated")),
-        Err(err) => Err(format!("Failed to set status: {}", err))
+        Ok(_p) => CmdResult::Ok(String::from("Status successfully updated")),
+        Err(err) => CmdResult::Err(format!("Failed to set status: {}", err))
     }
 }
 

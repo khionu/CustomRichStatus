@@ -55,8 +55,8 @@ impl AppState {
         self.state.rpc.start();
 
         match set::run(self.initial_dto.clone(), &mut self.state) {
-            Ok(msg) => println!("{}", msg),
-            Err(err) => panic!("{}", err)
+            CmdResult::Ok(msg) => println!("{}", msg),
+            CmdResult::Err(err) | CmdResult::Fatal(err) => panic!("{}", err)
         }
 
         loop {
@@ -69,20 +69,18 @@ impl AppState {
             io::stdin().read_line(&mut buffer).unwrap();
 
             match self.parse_and_execute(buffer.trim_right()) {
-                Ok(result) => println!("{}", result),
-                Err(err) => return err,
+                CmdResult::Ok(result) | CmdResult::Err(result) => println!("{}", result),
+                CmdResult::Fatal(err) => return err,
             }
         }
     }
 
-    // Result::Ok means, error or not, we can continue
-    // Result::Err is only on unrecoverable results
-    fn parse_and_execute(&mut self, input: &str) -> Result<String, String> {
+    fn parse_and_execute(&mut self, input: &str) -> CmdResult {
         let matches_result =
             self.cmd_app.clone().get_matches_from_safe(QuotedParts::from(&("> ".to_owned() + input)));
 
         if let Err(err) = matches_result {
-            return Ok(format!("Error parsing arguments: {}", err.description()));
+            return CmdResult::Err(format!("Error parsing arguments: {}", err.description()));
         }
 
         let matches = matches_result.unwrap();
@@ -99,7 +97,7 @@ impl AppState {
             [ $ns:ident ] => {
                 match $ns::parse(cmd) {
                     Ok(args) => $ns::run(args, &mut self.state),
-                    Err(err) => Ok(format!("Error parsing command: {}", err)),
+                    Err(err) => CmdResult::Ok(format!("Error parsing command: {}", err)),
                 }
             }
         }

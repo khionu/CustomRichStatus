@@ -32,3 +32,9 @@ pub fn register() -> App<'static, 'static> {
         )
     ).bin_name(">")
 }
+
+pub enum CmdResult {
+    Ok(String),
+    Err(String),
+    Fatal(String),
+}
