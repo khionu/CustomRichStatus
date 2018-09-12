@@ -17,5 +17,5 @@ use state::app_state::AppState;
 fn main() {
     let mut app_state = AppState::new();
 
-    app_state.run();
+    println!("{}", app_state.run());
 }
