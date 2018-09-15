@@ -7,6 +7,6 @@ pub fn run(msg: String, _state: &mut InternalState) -> CmdResult {
     Fatal(msg)
 }
 
-pub fn parse(_matches: &ArgMatches) -> Result<String, String> {
+pub fn parse(_matches: &ArgMatches, _state: &mut InternalState) -> Result<String, String> {
     Ok(String::from("Buh-bye! o/"))
 }

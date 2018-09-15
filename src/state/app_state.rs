@@ -15,11 +15,11 @@ pub struct AppState {
     initial_dto: ActivityDto,
     state: InternalState,
     cmd_app: App<'static, 'static>,
-    meta_data: &'static AppMetaData,
 }
 
 pub struct InternalState {
-    pub rpc: DiscordRPC
+    pub rpc: DiscordRPC,
+    pub meta_data: &'static AppMetaData,
 }
 
 impl AppState {
@@ -53,9 +53,12 @@ impl AppState {
 
         AppState {
             initial_dto,
-            state: InternalState { rpc },
+            state: InternalState
+                {
+                    rpc,
+                    meta_data,
+                },
             cmd_app,
-            meta_data,
         }
     }
 
@@ -70,7 +73,7 @@ impl AppState {
         loop {
             let mut buffer = String::new();
 
-            print!("{} ", self.meta_data.prompt);
+            print!("{} ", self.state.meta_data.prompt);
 
             #[allow(unused_must_use)] { io::stdout().flush(); }
 
@@ -103,7 +106,7 @@ impl AppState {
 
         macro_rules! load_command {
             [ $ns:ident ] => {
-                match $ns::parse(cmd) {
+                match $ns::parse(cmd, &mut self.state) {
                     Ok(args) => $ns::run(args, &mut self.state),
                     Err(err) => CmdResult::Ok(format!("Error parsing command: {}", err)),
                 }

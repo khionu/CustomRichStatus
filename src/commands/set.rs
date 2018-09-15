@@ -15,7 +15,7 @@ pub fn run(dto: ActivityDto, state: &mut InternalState) -> CmdResult {
     }
 }
 
-pub fn parse(matches: &ArgMatches) -> Result<ActivityDto, String> {
+pub fn parse(matches: &ArgMatches, state: &mut InternalState) -> Result<ActivityDto, String> {
     let mut dto = ActivityDto::default();
 
     if matches.is_present("PRESET") {
