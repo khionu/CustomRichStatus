@@ -3,7 +3,7 @@ use discord_rpc_client::models::Activity;
 use models::preset::Preset;
 use utils::time_diff::{hms_to_u64, AddOrSub::*};
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Default)]
 pub struct ActivityDto {
     pub details: Option<String>,
     pub state: Option<String>,
@@ -13,21 +13,6 @@ pub struct ActivityDto {
     pub small_text: Option<String>,
     pub start: Option<u64>,
     pub end: Option<u64>,
-}
-
-impl Default for ActivityDto {
-    fn default() -> Self {
-        ActivityDto {
-            details: None,
-            state: None,
-            large_image: None,
-            small_image: None,
-            large_text: None,
-            small_text: None,
-            start: None,
-            end: None,
-        }
-    }
 }
 
 impl ActivityDto {
