@@ -1,5 +1,6 @@
 [package]
 name = "custom_rich_status"
+description = "A repl command line for updating a Discord Rich Presence"
 version = "1.0.2"
 authors = ["Khionu Sybiern <dev@khionu.net>"]
 
