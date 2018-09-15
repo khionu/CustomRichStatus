@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::io;
 use std::io::Write;
 
@@ -98,7 +97,7 @@ impl AppState {
             self.cmd_app.clone().get_matches_from_safe(QuotedParts::from(&("> ".to_owned() + input)));
 
         if let Err(err) = matches_result {
-            return CmdResult::Err(format!("Error parsing arguments: {}", err.description()));
+            return CmdResult::Err(format!("Error parsing arguments: {}", err));
         }
 
         let matches = matches_result.unwrap();
