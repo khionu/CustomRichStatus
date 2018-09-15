@@ -15,6 +15,7 @@ pub struct AppState {
     initial_dto: ActivityDto,
     state: InternalState,
     cmd_app: App<'static, 'static>,
+    meta_data: &'static AppMetaData,
 }
 
 pub struct InternalState {
@@ -45,12 +46,16 @@ impl AppState {
             }
         };
 
-        let cmd_app = commands::register(AppMetaData::get());
+        let meta_data = AppMetaData::get(
+            config.prompt.unwrap_or(String::from(">")));
+
+        let cmd_app = commands::register(meta_data);
 
         AppState {
             initial_dto,
             state: InternalState { rpc },
             cmd_app,
+            meta_data,
         }
     }
 
@@ -65,7 +70,7 @@ impl AppState {
         loop {
             let mut buffer = String::new();
 
-            print!("> ");
+            print!("{} ", self.meta_data.prompt);
 
             #[allow(unused_must_use)] { io::stdout().flush(); }
 

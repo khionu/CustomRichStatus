@@ -32,7 +32,7 @@ pub fn register(meta_data: &AppMetaData) -> App {
                 (@arg END: --end -e [HH_MM_SS] "End epoch. For showing time remaining")
             )
         )
-    ).bin_name(">")
+    ).bin_name(meta_data.prompt.as_ref())
 }
 
 pub enum CmdResult {
