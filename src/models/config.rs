@@ -8,6 +8,7 @@ pub struct Config {
     pub client_id: u64,
     pub preset: Option<String>,
     pub prompt: Option<String>,
+    pub retain_state: Option<bool>,
 }
 
 impl Config {

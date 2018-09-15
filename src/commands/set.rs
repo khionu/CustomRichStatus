@@ -5,18 +5,26 @@ use models::{preset::Preset, dto::ActivityDto};
 use commands::CmdResult;
 
 pub fn run(dto: ActivityDto, state: &mut InternalState) -> CmdResult {
-    if dto == ActivityDto::default() {
+    if state.current_state.as_ref().map(|state| state == &dto).unwrap_or(false) {
         return CmdResult::Ok(String::from("Skipping empty status update"));
     }
 
-    match state.rpc.set_activity(|a|dto.apply_to_activity(a)) {
-        Ok(_p) => CmdResult::Ok(String::from("Status successfully updated")),
+    let dto_clone = dto.clone();
+
+    match state.rpc.set_activity(|a|dto_clone.apply_to_activity(a)) {
+        Ok(_p) => {
+            state.current_state = Some(dto);
+            CmdResult::Ok(String::from("Status successfully updated"))
+        },
         Err(err) => CmdResult::Err(format!("Failed to set status: {}", err))
     }
 }
 
 pub fn parse(matches: &ArgMatches, state: &mut InternalState) -> Result<ActivityDto, String> {
-    let mut dto = ActivityDto::default();
+    let mut dto = match state.current_state {
+        Some(ref current) => current.clone(),
+        _ => ActivityDto::default(),
+    };
 
     if matches.is_present("PRESET") {
         let preset_name = matches.value_of("PRESET").unwrap();

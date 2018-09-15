@@ -20,6 +20,7 @@ pub struct AppState {
 pub struct InternalState {
     pub rpc: DiscordRPC,
     pub meta_data: &'static AppMetaData,
+    pub current_state: Option<ActivityDto>,
 }
 
 impl AppState {
@@ -46,6 +47,11 @@ impl AppState {
             }
         };
 
+        let current_state = match config.retain_state {
+            Some(true) => Some(ActivityDto::default()),
+            _ => None,
+        };
+
         let meta_data = AppMetaData::get(
             config.prompt.unwrap_or(String::from(">")));
 
@@ -57,6 +63,7 @@ impl AppState {
                 {
                     rpc,
                     meta_data,
+                    current_state,
                 },
             cmd_app,
         }
