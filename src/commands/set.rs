@@ -1,6 +1,6 @@
 use state::app_state::InternalState;
 use clap::ArgMatches;
-use utils::{AddOrSub, hms_to_u64};
+use utils::time_diff::{AddOrSub, hms_to_u64};
 use models::{preset::Preset, dto::ActivityDto};
 use commands::CmdResult;
 

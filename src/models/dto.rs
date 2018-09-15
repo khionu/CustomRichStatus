@@ -1,8 +1,7 @@
 use discord_rpc_client::models::Activity;
 
 use models::preset::Preset;
-use utils::hms_to_u64;
-use utils::AddOrSub::*;
+use utils::time_diff::{hms_to_u64, AddOrSub::*};
 
 #[derive(Clone, PartialEq)]
 pub struct ActivityDto {
