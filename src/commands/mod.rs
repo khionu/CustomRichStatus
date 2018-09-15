@@ -1,5 +1,7 @@
 use clap::App;
 
+use state::meta_data::AppMetaData;
+
 // Commands
 
 pub mod set;
@@ -7,12 +9,12 @@ pub mod quit;
 
 // End Commands
 
-pub fn register() -> App<'static, 'static> {
+pub fn register(meta_data: &AppMetaData) -> App {
     clap_app!(app =>
-        (name: "Custom Rich Status")
-        (version: "0.1.0")
-        (author: "Khionu Sybiern <dev@khionu.net>")
-        (about: "Set and control a custom status that won't be overwritten by Verified Non-rich games")
+        (name: meta_data.name.as_ref())
+        (version: meta_data.version.as_ref())
+        (author: meta_data.authors.as_ref())
+        (about: meta_data.about.as_ref())
         (@subcommand quit =>
             (about: "Closes the program")
         )

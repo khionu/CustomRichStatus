@@ -9,6 +9,7 @@ use quoted_strings::QuotedParts;
 use commands;
 use commands::*;
 use models::{config::Config, preset::Preset, dto::ActivityDto};
+use state::meta_data::AppMetaData;
 
 pub struct AppState {
     initial_dto: ActivityDto,
@@ -44,10 +45,12 @@ impl AppState {
             }
         };
 
+        let cmd_app = commands::register(AppMetaData::get());
+
         AppState {
             initial_dto,
             state: InternalState { rpc },
-            cmd_app: commands::register(),
+            cmd_app,
         }
     }
 
