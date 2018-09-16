@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 use serde_yaml;
+use serde_yaml::Error;
 
 #[derive(Deserialize)]
 pub struct Config {
@@ -20,13 +21,19 @@ impl Config {
             directory formatted as in the documentation");
         }
 
-        let config = serde_yaml::from_reader(
+        let config_result: Result<Config, Error> = serde_yaml::from_reader(
             BufReader::new(config_file.unwrap()));
 
-        if let Err(_err) = config {
+        if let Err(_err) = config_result {
             return Err(format!("Error parsing preset: either invalid YAML or invalid fields"));
         }
 
-        Ok(config.unwrap())
+        let mut config = config_result.unwrap();
+
+        if config.retain_state == None {
+            config.retain_state = Some(true);
+        }
+
+        Ok(config)
     }
 }
