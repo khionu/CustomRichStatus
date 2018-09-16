@@ -1,8 +1,9 @@
-use state::app_state::InternalState;
 use clap::ArgMatches;
-use utils::time_diff::{AddOrSub, hms_to_u64};
-use models::{preset::Preset, dto::ActivityDto};
+
 use commands::CmdResult;
+use models::{preset::Preset, dto::ActivityDto};
+use state::app_state::InternalState;
+use utils::time_diff::{AddOrSub, hms_to_u64};
 
 pub fn run(dto: ActivityDto, state: &mut InternalState) -> CmdResult {
     if state.current_state.as_ref().map(|state| state == &dto).unwrap_or(false) {
@@ -25,6 +26,10 @@ pub fn parse(matches: &ArgMatches, state: &mut InternalState) -> Result<Activity
         Some(ref current) => current.clone(),
         _ => ActivityDto::default(),
     };
+
+    if matches.is_present("CLEAR") {
+        dto = ActivityDto::default();
+    }
 
     if matches.is_present("PRESET") {
         let preset_name = matches.value_of("PRESET").unwrap();

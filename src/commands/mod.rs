@@ -4,8 +4,9 @@ use state::meta_data::AppMetaData;
 
 // Commands
 
-pub mod set;
+pub mod clear;
 pub mod quit;
+pub mod set;
 
 // End Commands
 
@@ -18,8 +19,12 @@ pub fn register(meta_data: &AppMetaData) -> App {
         (@subcommand quit =>
             (about: "Closes the program")
         )
+        (@subcommand clear =>
+            (about: "Clears the current status")
+        )
         (@subcommand set =>
             (about: "Updates fields in the custom status")
+            (@arg CLEAR: --clear -c "Clears the existing status, then loads the details provided in the current command")
             (@arg PRESET: --preset -p [NAME] "Load a preset to use. Additional fields override the preset")
             (@arg DETAILS: --details -d [DETAILS] "Details content. This is where your status message should go")
             (@arg STATE: --state -S [STATE] "State content. This can be used as a second line")

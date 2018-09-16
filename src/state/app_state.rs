@@ -120,6 +120,7 @@ impl AppState {
         }
 
         match matches.subcommand_name().unwrap() {
+            "clear" => { load_command![clear] }
             "quit" => { load_command![quit] },
             "set" => { load_command![set] },
             &_ => panic!("DEVELOPER ERROR: FAILED TO REGISTER COMMAND")
