@@ -27,13 +27,10 @@ use state::meta_data::AppMetaData;
 use utils::gnr_error::{GnrError, Handling};
 
 fn main() {
-    let config_result = Config::load();
-
-    if let Err(err) = config_result {
-        panic!("{}", err);
-    }
-
-    let config = config_result.unwrap();
+    let config = match Config::load() {
+        Ok(cfg) => cfg,
+        Err(err) => panic!("{}", err),
+    };
 
     let rpc = DiscordRPC::new(config.client_id)
         .expect("Failed to create Discord RPC client");
@@ -41,7 +38,7 @@ fn main() {
     let initial_dto = match config.preset {
         None => ActivityDto::default(),
         Some(preset) => match load_initial_dto(&preset) {
-            Ok(dto) => dto,
+            Ok(dto)  => dto,
             Err(err) => {
                 println!("Error loading initial preset: {}", err);
                 ActivityDto::default()
@@ -49,8 +46,7 @@ fn main() {
         }
     };
 
-    let meta_data = AppMetaData::get(config.prompt.unwrap_or(String::from(">")),
-                                     config.quit_msg.unwrap_or(String::from("Buh-bye! o/")));
+    let meta_data = AppMetaData::get(config.prompt, config.quit_msg);
 
     let cmd_app = commands::register(meta_data);
 
@@ -59,8 +55,8 @@ fn main() {
             rpc,
             meta_data,
             current_state: match config.retain_state {
-                Some(true) => Some(ActivityDto::default()),
-                _ => None,
+                true  => Some(ActivityDto::default()),
+                false => None,
             },
         });
 
@@ -98,7 +94,11 @@ fn load_initial_dto(preset_name: &str) -> Result<ActivityDto, Box<GnrError>>  {
             and your config file");
     }
 
-    let preset = preset_load.unwrap();
+    let preset = match Preset::from_file(preset_name) {
+        Ok(pre) => pre,
+        Err(_err) => panic!("Preset specified in Config was invalid. Please double-check \
+                             your preset files and your config file"),
+    };
 
     ActivityDto::from_preset(preset)
 }
@@ -106,9 +106,9 @@ fn load_initial_dto(preset_name: &str) -> Result<ActivityDto, Box<GnrError>>  {
 fn print_x_errors(err: &dyn Error, x: i32) {
     eprintln!("{}", err);
 
-    if err.cause().is_some() {
+    if let Some(cause) = err.cause() {
         if x > 0 {
-            print_x_errors(err.cause().unwrap(), x - 1);
+            print_x_errors(cause, x - 1);
         } else {
             eprintln!("(Rest of trace excluded)");
         }

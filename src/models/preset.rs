@@ -19,23 +19,22 @@ pub struct Preset {
 
 impl Preset {
     pub fn from_file(name: &str) -> Result<Preset, Box<GnrError>> {
-        let preset_path: PathBuf = ["presets", &format!("{}.yml", name)].iter().collect();
+        let preset_path = PathBuf::new().join("presets").join(&format!("{}.yml", name));
 
-        let preset_file = File::open(preset_path);
+        let preset_file = match File::open(preset_path) {
+            Ok(file) => file,
+            Err(err) => {
+                return Err(GnrError::new_with_cause("Error opening preset", Handling::Print, err));
+            },
+        };
 
-        if let Err(err) = preset_file {
-            return Err(GnrError::new_with_cause("Error opening preset", Handling::Print, err));
-        }
-
-        let preset = serde_yaml::from_reader(
-            BufReader::new(preset_file.unwrap()));
-
-        if let Err(err) = preset {
-            return Err(GnrError::new_with_cause(
+        let preset = match serde_yaml::from_reader(BufReader::new(preset_file)) {
+            Ok(pre) => pre,
+            Err(err) => { return Err(GnrError::new_with_cause(
                 "Error parsing preset: either invalid YAML or invalid fields",
-                Handling::Print, err));
-        }
+                Handling::Print, err)); },
+        };
 
-        Ok(preset.unwrap())
+        Ok(preset)
     }
 }

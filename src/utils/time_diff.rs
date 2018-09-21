@@ -16,28 +16,23 @@ pub fn hms_to_u64(string: &str, action: &AddOrSub) -> Result<u64, Box<GnrError>>
     }
 
     let mut hms = [0, 0, 0];
-    let mut index = 0;
 
-    for seg in segments {
-        if let Ok(ref time) = u64::from_str_radix(seg, 10) {
-            hms[index] = *time;
-        } else { return Err(GnrError::new(FORMAT_ERROR, Handling::Print)); }
-
-        index += 1;
+    for (index, seg) in segments.iter().enumerate() {
+        match u64::from_str_radix(seg, 10) {
+            Ok(time) => { hms[index] = time; },
+            Err(_err) => { return Err(GnrError::new(FORMAT_ERROR, Handling::Print)); },
+        }
     }
-
-    index = 0;
 
     let mut timestamp = Local::now().timestamp() as u64;
 
-    for time in hms.iter() {
+    for (index, time) in hms.iter().enumerate() {
         match index {
             0 => { timestamp = add_or_sub(timestamp, time * 60 * 60, action); }   // Hours
             1 => { timestamp = add_or_sub(timestamp, time * 60, action); }        // Minutes
             2 => { timestamp = add_or_sub(timestamp, *time as u64, action); }     // Seconds
             _ => break,
         }
-        index += 1;
     }
 
     Ok(timestamp)
