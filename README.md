@@ -15,3 +15,5 @@ Additionally, check [the preset template](https://github.com/khionu/CustomRichSt
 for all fields that can be set in presets. Preset names correspond to their filename, minus extension.
 
 For more information, run `help` after starting the program.
+
+For support, join [the developer's Discord](https://discord.gg/uKxXevY)!
