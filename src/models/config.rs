@@ -31,7 +31,7 @@ impl Config {
                                  executable directory formatted as in the documentation"),
         };
 
-        let config: Config = match serde_yaml::from_reader(BufReader::new(config_file)) {
+        let config= match serde_yaml::from_reader(BufReader::new(config_file)) {
             Ok(cfg) => cfg,
             Err(err) => { return Err(GnrError::new_with_cause(
                 "Error parsing preset: either invalid YAML or invalid fields",
