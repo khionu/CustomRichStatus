@@ -1,16 +1,18 @@
 use chrono::*;
 
+use utils::gnr_error::{GnrError, Handling};
+
 const FORMAT_ERROR: &str = "Please provide the time format as HH:MM:SS";
 
-pub fn hms_to_u64(string: &str, action: &AddOrSub) -> Result<u64, &'static str> {
+pub fn hms_to_u64(string: &str, action: &AddOrSub) -> Result<u64, Box<GnrError>> {
     let segments: Vec<&str> = string.split(':').collect();
 
     if segments.len() != 3 {
-        return Err(FORMAT_ERROR);
+        return Err(GnrError::new(FORMAT_ERROR, Handling::Print));
     }
 
     if segments.iter().any(|s| (*s).len() > 2 || (*s).len() < 1) {
-        return Err(FORMAT_ERROR);
+        return Err(GnrError::new(FORMAT_ERROR, Handling::Print));
     }
 
     let mut hms = [0, 0, 0];
@@ -19,7 +21,7 @@ pub fn hms_to_u64(string: &str, action: &AddOrSub) -> Result<u64, &'static str> 
     for seg in segments {
         if let Ok(ref time) = u64::from_str_radix(seg, 10) {
             hms[index] = *time;
-        } else { return Err(FORMAT_ERROR); }
+        } else { return Err(GnrError::new(FORMAT_ERROR, Handling::Print)); }
 
         index += 1;
     }
@@ -33,7 +35,7 @@ pub fn hms_to_u64(string: &str, action: &AddOrSub) -> Result<u64, &'static str> 
             0 => { timestamp = add_or_sub(timestamp, time * 60 * 60, action); }   // Hours
             1 => { timestamp = add_or_sub(timestamp, time * 60, action); }        // Minutes
             2 => { timestamp = add_or_sub(timestamp, *time as u64, action); }     // Seconds
-            _ => break
+            _ => break,
         }
         index += 1;
     }
@@ -41,10 +43,10 @@ pub fn hms_to_u64(string: &str, action: &AddOrSub) -> Result<u64, &'static str> 
     Ok(timestamp)
 }
 
-pub fn add_or_sub(current: u64, new: u64, action: &AddOrSub) -> u64 {
+pub fn add_or_sub(current: u64, diff: u64, action: &AddOrSub) -> u64 {
     match action {
-        AddOrSub::Add => current + new,
-        AddOrSub::Sub => current - new,
+        AddOrSub::Add => current + diff,
+        AddOrSub::Sub => current - diff,
     }
 }
 

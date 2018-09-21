@@ -1,14 +1,14 @@
-use clap::App;
-
-use state::meta_data::AppMetaData;
-
-// Commands
-
 pub mod clear;
 pub mod quit;
 pub mod set;
 
-// End Commands
+pub use self::clear::ClearCmd;
+pub use self::quit::QuitCmd;
+pub use self::set::SetCmd;
+
+use clap::App;
+
+use state::meta_data::AppMetaData;
 
 pub fn register(meta_data: &AppMetaData) -> App {
     clap_app!(app =>
@@ -38,10 +38,4 @@ pub fn register(meta_data: &AppMetaData) -> App {
             )
         )
     ).bin_name(meta_data.prompt.as_ref())
-}
-
-pub enum CmdResult {
-    Ok(String),
-    Err(String),
-    Fatal(String),
 }

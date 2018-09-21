@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 use std::fs::File;
-use std::error::Error;
 use std::io::BufReader;
 
 use serde_yaml;
+use utils::gnr_error::{GnrError, Handling};
 
 #[derive(Serialize, Deserialize)]
 pub struct Preset {
@@ -18,20 +18,22 @@ pub struct Preset {
 }
 
 impl Preset {
-    pub fn from_file(name: &str) -> Result<Preset, String> {
+    pub fn from_file(name: &str) -> Result<Preset, Box<GnrError>> {
         let preset_path: PathBuf = ["presets", &format!("{}.yml", name)].iter().collect();
 
         let preset_file = File::open(preset_path);
 
         if let Err(err) = preset_file {
-            return Err(format!("Error opening preset: {}", err.description()));
+            return Err(GnrError::new_with_cause("Error opening preset", Handling::Print, err));
         }
 
         let preset = serde_yaml::from_reader(
             BufReader::new(preset_file.unwrap()));
 
-        if let Err(_err) = preset {
-            return Err(format!("Error parsing preset: either invalid YAML or invalid fields"));
+        if let Err(err) = preset {
+            return Err(GnrError::new_with_cause(
+                "Error parsing preset: either invalid YAML or invalid fields",
+                Handling::Print, err));
         }
 
         Ok(preset.unwrap())

@@ -4,6 +4,7 @@ pub struct AppMetaData {
     pub authors: String,
     pub about: String,
     pub prompt: String,
+    pub quit_msg: String,
 }
 
 const APP_NAME:        &str =      "Custom Rich Status";
@@ -12,7 +13,7 @@ const PKG_AUTHORS:     &str = env!("CARGO_PKG_AUTHORS");
 const PKG_DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 
 impl AppMetaData {
-    pub fn get(prompt: String) -> &'static AppMetaData {
+    pub fn get(prompt: String, quit_msg: String) -> &'static AppMetaData {
         let name    = String::from(APP_NAME);
         let version = String::from(PKG_VERSION);
         let authors = String::from(PKG_AUTHORS.replace(":", ", "));
@@ -24,6 +25,7 @@ impl AppMetaData {
             authors,
             about,
             prompt,
+            quit_msg,
         };
 
         Box::leak(Box::new(meta_data))
