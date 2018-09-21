@@ -6,7 +6,6 @@ use quoted_strings::QuotedParts;
 
 use state::app_state::State;
 
-use command_engine::commands::*;
 use command_engine::command::Command;
 use utils::gnr_error::{GnrError, Handling};
 
@@ -59,6 +58,7 @@ impl CmdEngine {
 
         let cmd_matches = matches.subcommand().1.unwrap();
 
+        use command_engine::commands::*;
         match sub_name.unwrap() {
             "set" => SetCmd::parse_and_run(cmd_matches, &mut self.state),
             "clear" => ClearCmd::parse_and_run(cmd_matches, &mut self.state),
