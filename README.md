@@ -8,5 +8,10 @@
 2) Copy down your Client ID into your `config.yml`.
 3) Add your assets to [this section](https://i.imgur.com/nqoSRFK.png) of your Application.
   
-_Optional: Make presets based on `presets/template.yml`. All fields are optional._  
-_Hint: You can set the preset to load on start in the config by the `preset` key._
+Check [the config defaults](https://github.com/khionu/CustomRichStatus/blob/master/config.defaults.yml) to see all
+the configuration options available.
+
+Additionally, check [the preset template](https://github.com/khionu/CustomRichStatus/blob/master/presets/template.yml)
+for all fields that can be set in presets. Preset names correspond to their filename, minus extension.
+
+For more information, run `help` after starting the program.
