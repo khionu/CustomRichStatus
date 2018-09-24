@@ -28,18 +28,15 @@ main() {
 
     cp $bin $stage/
     cp config.yml $stage/
+    cp README.md $stage/
+    cp LICENCE $stage/
 
     mkdir $stage/presets/
     cp presets/* $stage/presets/
 
-    cp LICENCE $stage/
-    cp README.md $stage/
-
     cd $stage
     tar czf $src/$CRATE_NAME-$TRAVIS_TAG-$TARGET.tar.gz *
     cd $src
-
-    rm -rf $stage
 }
 
 main
