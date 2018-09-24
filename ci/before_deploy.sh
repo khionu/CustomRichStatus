@@ -28,6 +28,7 @@ main() {
 
     cp $bin $stage/
     cp config.yml $stage/
+    cp config.defaults.yml $stage/
     cp README.md $stage/
     cp LICENCE $stage/
 
