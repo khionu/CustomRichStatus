@@ -34,7 +34,7 @@ impl CmdEngine {
         String::from(buffer.trim_right())
     }
 
-    pub fn process(&mut self, input: &str) -> Result<&str, Box<GnrError>> {
+    pub fn process(&mut self, input: &str) -> Result<String, Box<GnrError>> {
         let mut cmd_str = self.state.meta_data.prompt.clone();
         cmd_str += " ";
         cmd_str += input;

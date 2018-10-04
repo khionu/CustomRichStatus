@@ -17,11 +17,11 @@ impl Command for ClearCmd {
         Ok(())
     }
 
-    fn run(_blank: Self::CmdArgs, state: &mut State) -> Result<&'static str, Box<GnrError>> {
+    fn run(_blank: Self::CmdArgs, state: &mut State) -> Result<String, Box<GnrError>> {
         state.current_state = Some(ActivityDto::default());
 
         match state.rpc.set_activity(|a| ActivityDto::default().apply_to_activity(a)) {
-            Ok(_p) => Ok(SUCCESSFULLY_CLEARED),
+            Ok(_p) => Ok(String::from(SUCCESSFULLY_CLEARED)),
             Err(err) => Err(
                 GnrError::new_with_cause(FAILED_TO_CLEAR, Handling::Print, err)
             ),

@@ -7,10 +7,10 @@ pub trait Command {
     type CmdArgs;
 
     fn parse(matches: &ArgMatches, state: &State) -> Result<Self::CmdArgs, Box<GnrError>>;
-    fn run(args: Self::CmdArgs, state: &mut State) -> Result<&'static str, Box<GnrError>>;
+    fn run(args: Self::CmdArgs, state: &mut State) -> Result<String, Box<GnrError>>;
 
     fn parse_and_run(matches: &ArgMatches, state: &mut State)
-        -> Result<&'static str, Box<GnrError>> {
+        -> Result<String, Box<GnrError>> {
         Self::run(Self::parse(matches, state)?, state)
     }
 }

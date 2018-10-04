@@ -13,7 +13,7 @@ impl Command for QuitCmd {
         Ok(&state.meta_data.quit_msg)
     }
 
-    fn run(msg: Self::CmdArgs, _state: &mut State) -> Result<&'static str, Box<GnrError>> {
+    fn run(msg: Self::CmdArgs, _state: &mut State) -> Result<String, Box<GnrError>> {
         Err(GnrError::new(msg, Handling::Exit))
     }
 }

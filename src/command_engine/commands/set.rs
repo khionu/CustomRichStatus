@@ -23,9 +23,9 @@ impl Command for SetCmd {
         dto.add_cmd_args(matches)
     }
 
-    fn run(dto: Self::CmdArgs, state: &mut State) -> Result<&'static str, Box<GnrError>> {
+    fn run(dto: Self::CmdArgs, state: &mut State) -> Result<String, Box<GnrError>> {
         if state.current_state.as_ref().map(|state| state == &dto).unwrap_or(false) {
-            return Ok(SKIPPING_EMPTY);
+            return Ok(String::from(SKIPPING_EMPTY));
         }
 
         let dto_clone = dto.clone();
@@ -33,7 +33,7 @@ impl Command for SetCmd {
         match state.rpc.set_activity(|a| dto_clone.apply_to_activity(a)) {
             Ok(_p) => {
                 state.current_state = Some(dto);
-                Ok(SUCCESSFUL_UPDATE)
+                Ok(String::from(SUCCESSFUL_UPDATE))
             },
             Err(err) => Err(
                 GnrError::new_with_cause(FAILED_TO_UPDATE, Handling::Print, err)

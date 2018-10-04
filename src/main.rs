@@ -1,6 +1,7 @@
 extern crate chrono;
 #[macro_use]
 extern crate clap;
+extern crate dirs;
 extern crate core;
 extern crate discord_rpc_client;
 extern crate quoted_strings;
