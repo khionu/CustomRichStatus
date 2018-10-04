@@ -11,6 +11,7 @@ use utils::gnr_error::{GnrError, Handling};
 
 #[derive(Deserialize)]
 pub struct Preset {
+    pub meta_description: Option<String>,
     pub details: Option<String>,
     pub state: Option<String>,
     pub large_image: Option<String>,
@@ -42,6 +43,40 @@ impl Preset {
         };
 
         Ok(preset)
+    }
+
+    pub fn list_all() -> Result<Vec<(String, Option<String>)>, Box<GnrError>> {
+        let path = Self::get_dir()?;
+
+        let mut presets = Vec::new();
+
+        let read_result = fs::read_dir(path);
+
+        if let Err(err) = read_result {
+            return Err(GnrError::new_with_cause("Error reading preset directory",
+                                                Handling::Print, err));
+        }
+
+        for entry in read_result.unwrap() {
+            if let Ok(item) = entry {
+                let name = match item.file_name().into_string() {
+                    Ok(s) => s,
+                    Err(e) => e.to_string_lossy().into_owned(),
+                };
+
+                match name.ends_with(".yml") {
+                    true => {
+                        let name= name.trim_right_matches(".yml");
+                        let preset = Self::from_file(&name)?;
+
+                        presets.push((String::from(name), preset.meta_description));
+                    },
+                    _ => {},
+                }
+            }
+        }
+
+        Ok(presets)
     }
 
     fn get_dir() -> Result<PathBuf, Box<GnrError>> {

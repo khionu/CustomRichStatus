@@ -60,10 +60,11 @@ impl CmdEngine {
 
         use command_engine::commands::*;
         match sub_name.unwrap() {
-            "set" => SetCmd::parse_and_run(cmd_matches, &mut self.state),
-            "clear" => ClearCmd::parse_and_run(cmd_matches, &mut self.state),
-            "quit" => QuitCmd::parse_and_run(cmd_matches, &mut self.state),
-            &_ => panic!("DEVELOPER ERROR: FAILED TO REGISTER COMMAND") // TODO: Implement as Test instead
+            "clear"   => ClearCmd::parse_and_run(cmd_matches, &mut self.state),
+            "presets" => PresetsCmd::parse_and_run(cmd_matches, &mut self.state),
+            "quit"    => QuitCmd::parse_and_run(cmd_matches, &mut self.state),
+            "set"     => SetCmd::parse_and_run(cmd_matches, &mut self.state),
+            &_        => panic!("DEVELOPER ERROR: FAILED TO REGISTER COMMAND") // TODO: Implement as Test instead
         }
     }
 }

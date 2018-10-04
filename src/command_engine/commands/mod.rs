@@ -1,8 +1,10 @@
 pub mod clear;
+pub mod presets;
 pub mod quit;
 pub mod set;
 
 pub use self::clear::ClearCmd;
+pub use self::presets::PresetsCmd;
 pub use self::quit::QuitCmd;
 pub use self::set::SetCmd;
 
@@ -16,6 +18,9 @@ pub fn register(meta_data: &AppMetaData) -> App {
         (version: meta_data.version.as_ref())
         (author: meta_data.authors.as_ref())
         (about: meta_data.about.as_ref())
+        (@subcommand presets =>
+            (about: "Lists available presets")
+        )
         (@subcommand quit =>
             (about: "Closes the program")
         )
