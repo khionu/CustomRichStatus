@@ -25,6 +25,6 @@ impl Command for PresetsCmd {
                   .add("\n");
         }
 
-        Ok(buffer)
+        Ok(buffer.trim_right().to_owned())
     }
 }
