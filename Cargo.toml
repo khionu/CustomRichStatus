@@ -11,6 +11,9 @@ exclude = [
     ".travis.yml"
 ]
 
+[badges]
+travis-ci = { repositor = "khionu/CustomRichStatus" }
+
 [dependencies]
 discord-rpc-client = "^0.2"
 clap = "2"
