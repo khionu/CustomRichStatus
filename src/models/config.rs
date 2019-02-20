@@ -1,12 +1,28 @@
-use std::fs::File;
-use std::io::BufReader;
-use std::io::Write;
-use std::path::PathBuf;
+use std::{
+    fs::File,
+    io::{
+        BufReader,
+        Write,
+    },
+    path::PathBuf,
+    sync::Mutex,
+};
 
 use dirs;
 use serde_yaml;
 
-use utils::gnr_error::{GnrError, Handling};
+use crate::utils::fail::AppError;
+
+// ID of the provided default client.
+const DEFAULT_ID: u64 = 488908526031339522;
+const DEFAULT_PRESET: Option<String> = None;
+const DEFAULT_PROMPT: &str = ">";
+const DEFAULT_RETAIN_STATE: bool = false;
+const DEFAULT_QUIT_MESSAGE: &str = "Buh-bye! o/";
+
+lazy_static! {
+    static ref CONFIG: Mutex<Option<&'static Config>> = Mutex::new(None);
+}
 
 #[derive(Deserialize)]
 pub struct Config {
@@ -21,60 +37,88 @@ pub struct Config {
     pub quit_msg: String,
 }
 
-fn default_preset() -> Option<String> { None }
-fn default_prompt() -> String { String::from(">") }
-fn default_retain_state() -> bool { true }
-fn default_quit_msg() -> String { String::from("Buh-bye! o/") }
+fn default_id() -> u64 {
+    DEFAULT_ID
+}
+fn default_preset() -> Option<String> {
+    DEFAULT_PRESET
+}
+fn default_prompt() -> String {
+    String::from(DEFAULT_PROMPT)
+}
+fn default_retain_state() -> bool {
+    true
+}
+fn default_quit_msg() -> String {
+    String::from(DEFAULT_QUIT_MESSAGE)
+}
 
 const CONFIG_FILE: &str = "config.yml";
 const CONFIG_PATH_FILE: &str = "custom_rich_status/config.yml";
 
 impl Config {
-    pub fn load() -> Result<Config, Box<GnrError>> {
+    pub fn get() -> Result<&'static Config, AppError> {
+        let mut guard = match CONFIG.lock() {
+            Ok(g) => g,
+            Err(rip) => {
+                let mut ded = rip.into_inner();
+                *ded = None;
+                ded // Such poison. Much ded. Ow.
+            }
+        };
+
+        Ok(match *guard {
+            Some(config) => config,
+            None => {
+                let config = Self::load()?;
+                *guard = Some(Box::leak(Box::from(config)));
+                guard.unwrap()
+            }
+        })
+    }
+
+    fn load() -> Result<Config, AppError> {
         let mut config_path = PathBuf::from(CONFIG_FILE);
 
         if !config_path.exists() {
-            config_path = dirs::config_dir().unwrap().join(CONFIG_PATH_FILE);
+            config_path = dirs::config_dir()
+                .expect("unsupported system")
+                .join(CONFIG_PATH_FILE);
 
             if !config_path.exists() {
-                let mut new_file = match File::create(&config_path) {
-                    Ok(file) => file,
-                    Err(err) => {
-                        return Err(GnrError::new_with_cause("Error creating new config file",
-                                                            Handling::Crash, err));
-                    },
-                };
+                let mut new_file = File::create(&config_path)?;
 
-                match new_file.write(Config::default().as_ref()) {
-                    Err(err) => {
-                        return Err(GnrError::new_with_cause("Error writing new config file",
-                                                            Handling::Crash, err));
-                    },
-                    _ => { },
-                }
+                new_file.write(Config::default_bytes())?;
+
+                BufReader::new(Config::default_bytes());
+
+                return Ok(Config::default());
             }
         }
 
-        let config_file = match File::open(config_path) {
-            Ok(file) => file,
-            Err(err) =>  {
-                return Err(GnrError::new_with_cause("Error reading config file",
-                                                    Handling::Crash, err));
-            },
-        };
-
-        let config= match serde_yaml::from_reader(BufReader::new(config_file)) {
-            Ok(cfg) => cfg,
-            Err(err) => {
-                return Err(GnrError::new_with_cause("Error parsing preset: either invalid YAML or invalid fields",
-                   Handling::Crash, err));
-            },
-        };
-
-        Ok(config)
+        match serde_yaml::from_reader(BufReader::new(File::open(&config_path)?)) {
+            Ok(config) => Ok(config),
+            Err(err) => Err(AppError::DeserializeFailure {
+                data_type: String::from("config"),
+                file: String::from(config_path.to_str().expect("invalid UTF8")),
+                inner: err.into(),
+            }),
+        }
     }
 
-    fn default() -> &'static [u8] {
+    fn default_bytes() -> &'static [u8] {
         include_bytes!("../../config.yml")
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            client_id: DEFAULT_ID,
+            preset: DEFAULT_PRESET,
+            prompt: String::from(DEFAULT_PROMPT),
+            retain_state: DEFAULT_RETAIN_STATE,
+            quit_msg: String::from(DEFAULT_QUIT_MESSAGE),
+        }
     }
 }

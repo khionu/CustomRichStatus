@@ -5,7 +5,8 @@ readme = "README.md"
 repository = "https://github.com/khionu/CustomRichStatus"
 license = "LGPL-3.0"
 version = "1.1.0"
-authors = ["Khionu Sybiern <dev@khionu.net>"]
+authors = [ "Khionu Sybiern <dev@khionu.net>" ]
+edition = "2018"
 exclude = [
     "ci/*",
     ".github/*",
@@ -16,11 +17,15 @@ exclude = [
 travis-ci = { repositor = "khionu/CustomRichStatus" }
 
 [dependencies]
-discord-rpc-client = "^0.2"
-clap = "2"
-dirs = "1.0"
-serde = "1.0"
-serde_yaml = "0.8"
-serde_derive = "1.0"
-chrono = "0.4"
+chrono = "0.4.6"
+dirs = "1.0.4"
+discord-rpc-client = { git = "https://gitlab.com/khionu/discord-rpc-client.rs", branch = "patch-1" }
+failure = "0.1.5"
+failure_derive = "0.1.5"
+human-panic = "1.0.1"
+lazy_static = "1.2.0"
 quoted_strings = "0.1.0"
+serde = "1.0.87"
+serde_yaml = "0.8.8"
+serde_derive = "1.0.87"
+structopt = "0.2.14"

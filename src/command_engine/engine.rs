@@ -1,70 +1,66 @@
-use std::io;
-use std::io::Write;
+use std::{
+    io,
+    io::Write,
+    process,
+};
 
-use clap::App;
-use quoted_strings::QuotedParts;
+use structopt::StructOpt;
 
-use state::app_state::State;
+use crate::{
+    command_engine::commands,
+    models::dto::ActivityDto,
+    quoted_strings::QuotedParts,
+    state::app_state::State,
+    utils::fail::AppError,
+};
 
-use command_engine::command::Command;
-use utils::gnr_error::{GnrError, Handling};
+const CRIT_ERR: &str = "critical io error, please report to dev";
 
-pub struct CmdEngine {
-    cmd_app: App<'static, 'static>,
-    pub state: State,
-}
+pub struct CmdEngine {}
 
 impl CmdEngine {
-    pub fn new(cmd_app: App<'static, 'static>, state: State) -> CmdEngine {
-        CmdEngine {
-            cmd_app,
-            state,
-        }
-    }
-
-    pub fn await_input(&self) -> String {
+    pub fn await_input(state: &State) -> String {
         let mut buffer = String::new();
+        buffer.push_str(state.meta_data.prompt.as_ref());
+        buffer.push(' ');
 
-        print!("{} ", self.state.meta_data.prompt);
+        print!("{}", &buffer);
 
-        #[allow(unused_must_use)] { io::stdout().flush(); }
+        io::stdout().flush().expect(CRIT_ERR);
 
-        io::stdin().read_line(&mut buffer).unwrap();
+        io::stdin().read_line(&mut buffer).expect(CRIT_ERR);
 
         String::from(buffer.trim_right())
     }
 
-    pub fn process(&mut self, input: &str) -> Result<String, Box<GnrError>> {
-        let mut cmd_str = self.state.meta_data.prompt.clone();
-        cmd_str += " ";
-        cmd_str += input;
+    pub fn process(cmd_str: &str, state: &mut State) -> Result<String, AppError> {
+        let split_by_quotes = QuotedParts::from(cmd_str);
 
-        let split_by_quotes = QuotedParts::from(cmd_str.as_ref());
+        let root = commands::CliRoot::from_iter_safe(split_by_quotes)?;
 
-        let matches_result = self.cmd_app.clone().get_matches_from_safe(split_by_quotes);
-
-        if let Err(err) = matches_result {
-            return Err(GnrError::new_with_cause("Error parsing arguments", Handling::Print, err));
-        }
-
-        let matches = matches_result.unwrap();
-
-        let sub_name = matches.subcommand_name();
-
-        // TODO: Implement as Test instead
-        if let None = sub_name {
-            panic!("DEVELOPER ERROR: CREATED OPTIONS OUTSIDE OF COMMAND")
-        }
-
-        let cmd_matches = matches.subcommand().1.unwrap();
-
-        use command_engine::commands::*;
-        match sub_name.unwrap() {
-            "clear"   => ClearCmd::parse_and_run(cmd_matches, &mut self.state),
-            "presets" => PresetsCmd::parse_and_run(cmd_matches, &mut self.state),
-            "quit"    => QuitCmd::parse_and_run(cmd_matches, &mut self.state),
-            "set"     => SetCmd::parse_and_run(cmd_matches, &mut self.state),
-            &_        => panic!("DEVELOPER ERROR: FAILED TO REGISTER COMMAND") // TODO: Implement as Test instead
+        use crate::command_engine::commands::*;
+        match root {
+            CliRoot::Quit | CliRoot::Exit => {
+                println!("{}", state.meta_data.quit_msg);
+                process::exit(0)
+            }
+            CliRoot::Clear => ClearCmd::run(state),
+            CliRoot::Preset(sub) => match sub {
+                PresetCli::List => ListCmd::run(),
+                PresetCli::Create(args) => {
+                    CreateCmd::run(
+                        args.name.as_ref(),
+                        args.overwrite,
+                        args.use_current,
+                        ActivityDto::from_flags(args.dto_flags)?,
+                        state
+                    )
+                },
+                PresetCli::Delete{ name } => DeleteCmd::run(name),
+            },
+            CliRoot::Set { dto_flags, clear } => {
+                SetCmd::run(ActivityDto::from_flags(dto_flags)?, clear, state)
+            }
         }
     }
 }

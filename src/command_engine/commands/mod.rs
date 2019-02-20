@@ -1,46 +1,114 @@
-pub mod clear;
-pub mod presets;
-pub mod quit;
-pub mod set;
+// Commands
+mod clear;
+mod create;
+mod delete;
+mod list;
+mod set;
 
-pub use self::clear::ClearCmd;
-pub use self::presets::PresetsCmd;
-pub use self::quit::QuitCmd;
-pub use self::set::SetCmd;
+pub use self::{
+    clear::ClearCmd,
+    create::CreateCmd,
+    delete::DeleteCmd,
+    list::ListCmd,
+    set::SetCmd
+};
 
-use clap::App;
+use structopt::StructOpt;
 
-use state::meta_data::AppMetaData;
+#[derive(Debug, StructOpt)]
+#[structopt(name = "CustomRichStatus")]
+pub enum CliRoot {
+    #[structopt(name = "clear", about = "Clears the current status")]
+    Clear,
+    #[structopt(name = "exit", about = "Alias for \"quit\"")]
+    Exit,
+    Preset(PresetCli),
+    #[structopt(name = "quit", about = "Closes the program")]
+    Quit,
+    #[structopt(name = "set", about = "Updates fields in the custom status")]
+    Set {
+        #[structopt(flatten)]
+        dto_flags: DtoFlags,
+        #[structopt(
+            short = "c",
+            help = "Clears the existing status, then loads the details provided in the current command"
+        )]
+        clear: bool,
+    },
+}
 
-pub fn register(meta_data: &AppMetaData) -> App {
-    clap_app!(app =>
-        (name: meta_data.name.as_ref())
-        (version: meta_data.version.as_ref())
-        (author: meta_data.authors.as_ref())
-        (about: meta_data.about.as_ref())
-        (@subcommand presets =>
-            (about: "Lists available presets")
-        )
-        (@subcommand quit =>
-            (about: "Closes the program")
-        )
-        (@subcommand clear =>
-            (about: "Clears the current status")
-        )
-        (@subcommand set =>
-            (about: "Updates fields in the custom status")
-            (@arg CLEAR: --clear -c "Clears the existing status, then loads the details provided in the current command")
-            (@arg PRESET: --preset -p [NAME] "Load a preset to use. Additional fields override the preset")
-            (@arg DETAILS: --details -d [DETAILS] "Details content. This is where your status message should go")
-            (@arg STATE: --state -S [STATE] "State content. This can be used as a second line")
-            (@arg LG_IMG: --("large-img") -I [ASSET] "Key for the Large Image asset")
-            (@arg SM_IMG: --("small-img") -i [ASSET] "Key for the Small Image asset")
-            (@arg LG_TXT: --("large-txt") -T [ASSET] "Tooltip for the Large Image")
-            (@arg SM_TXT: --("small-txt") -t [ASSET] "Tooltip for the Small Image")
-            (@group timestamp =>
-                (@arg START: --start -s [HH_MM_SS] "Start epoch. For showing time elapsed")
-                (@arg END: --end -e [HH_MM_SS] "End epoch. For showing time remaining")
-            )
-        )
-    ).bin_name(meta_data.prompt.as_ref())
+#[derive(Debug, StructOpt)]
+#[structopt(name = "preset", about = "Commands to manage presets")]
+pub enum PresetCli {
+    #[structopt(name = "create", about = "Creates a new preset")]
+    Create(PresetCreateArgs),
+    #[structopt(name = "delete", about = "Deletes a preset")]
+    Delete {
+        #[structopt(required = true, help = "Name of the preset to delete")]
+        name: String,
+    },
+    #[structopt(name = "list", about = "Lists available presets")]
+    List,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct PresetCreateArgs {
+    #[structopt(required = true, help = "Name of the preset to create")]
+    pub name: String,
+    #[structopt(short = "o", help = "Will overwrite the preset with the same name")]
+    pub overwrite: bool,
+    #[structopt(
+        short = "c",
+        long = "current",
+        conflicts_with = "preset",
+        help = "Uses the current status. Additional fields override the preset.\
+                Requires Retained State"
+    )]
+    pub use_current: bool,
+    #[structopt(flatten)]
+    pub dto_flags: DtoFlags,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct DtoFlags {
+    #[structopt(
+        short = "p",
+        help = "Select a preset for the base. Additional fields override the preset"
+    )]
+    pub preset: Option<String>,
+    #[structopt(
+        short = "d",
+        help = "Details content. This is where your status message should go"
+    )]
+    pub details: Option<String>,
+    #[structopt(short = "S", help = "State content. This can be used as a second line")]
+    pub state: Option<String>,
+    #[structopt(
+        short = "I",
+        long = "large-img",
+        help = "Key for the Large Image asset"
+    )]
+    pub lg_img: Option<String>,
+    #[structopt(
+        short = "i",
+        long = "small-img",
+        help = "Key for the Small Image asset"
+    )]
+    pub sm_img: Option<String>,
+    #[structopt(short = "T", long = "large-txt", help = "Tooltip for the Large Image")]
+    pub lg_txt: Option<String>,
+    #[structopt(short = "t", long = "small-txt", help = "Tooltip for the Small Image")]
+    pub sm_txt: Option<String>,
+    #[structopt(
+        short = "s",
+        conflicts_with = "end",
+        help = "Start epoch. For showing time elapsed"
+    )]
+    pub start: Option<String>,
+    #[structopt(
+        short = "e",
+        conflicts_with = "start",
+        help = "End epoch. For showing time remaining"
+    )]
+    pub end: Option<String>,
 }

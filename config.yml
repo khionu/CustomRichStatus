@@ -1,2 +1,5 @@
 client_id: 488908526031339522
 preset: standard
+prompt: ">"
+retain_state: true
+quit_msg: "Buh-bye! o/"

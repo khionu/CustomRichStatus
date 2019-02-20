@@ -1,11 +1,22 @@
-use clap::ArgMatches;
+use std::ops::AddAssign;
+
 use discord_rpc_client::models::Activity;
 
-use models::preset::Preset;
-use utils::time_diff::{hms_to_u64, AddOrSub};
-use utils::gnr_error::GnrError;
+use crate::{
+    command_engine::commands::DtoFlags,
+    models::preset::Preset,
+    utils::{
+        fail::AppError,
+        time_diff,
+    },
+};
 
-#[derive(Clone, PartialEq, Default)]
+
+lazy_static! {
+    static ref EMPTY: ActivityDto = ActivityDto::default();
+}
+
+#[derive(Clone, PartialEq, Default, Debug)]
 pub struct ActivityDto {
     pub details: Option<String>,
     pub state: Option<String>,
@@ -14,77 +25,12 @@ pub struct ActivityDto {
     pub large_text: Option<String>,
     pub small_text: Option<String>,
     pub start: Option<u64>,
+    pub start_hms: Option<String>,
     pub end: Option<u64>,
+    pub end_hms: Option<String>,
 }
 
 impl ActivityDto {
-    pub fn from_preset(p: Preset) -> Result<ActivityDto, Box<GnrError>> {
-        let start = match p.start {
-            Some(t) => Some(hms_to_u64(&t, &AddOrSub::Sub)?),
-            None => None
-        };
-        let end = match p.end{
-            Some(t) => Some(hms_to_u64(&t, &AddOrSub::Add)?),
-            None => None
-        };
-
-        Ok(ActivityDto {
-            details: p.details,
-            state: p.state,
-            large_image: p.large_image,
-            small_image: p.small_image,
-            large_text: p.large_text,
-            small_text: p.small_text,
-            start,
-            end,
-        })
-    }
-
-    pub fn add_cmd_args(&mut self, matches: &ArgMatches) -> Result<ActivityDto, Box<GnrError>> {
-        let mut dto = self.clone();
-
-        if matches.is_present("CLEAR") {
-            dto = ActivityDto::default();
-        }
-
-        if matches.is_present("PRESET") {
-            let preset_name = matches.value_of("PRESET").unwrap();
-            let preset = Preset::from_file(preset_name)?;
-
-            dto = ActivityDto::from_preset(preset)?;
-        }
-
-        macro_rules! hms_args_to_dto {
-            [ $prop:ident, $arg:expr, $act:ident ] => {
-                if matches.is_present($arg) {
-                    let $prop = hms_to_u64(matches.value_of($arg).unwrap(), &AddOrSub::$act)?;
-
-                    dto.$prop = Some($prop);
-                }
-            };
-        }
-
-        macro_rules! str_args_to_dto {
-            [ $prop:ident, $arg:expr ] => {
-                if matches.is_present($arg) {
-                    dto.$prop = Some(matches.value_of($arg).unwrap().to_string());
-                }
-            };
-        }
-
-        hms_args_to_dto![start, "START",    Sub];
-        hms_args_to_dto![end,   "END",      Add];
-
-        str_args_to_dto![details,      "DETAILS"];
-        str_args_to_dto![state,        "STATE"];
-        str_args_to_dto![large_image,  "LG_IMG"];
-        str_args_to_dto![small_image,  "SM_IMG"];
-        str_args_to_dto![large_text,   "LG_TXT"];
-        str_args_to_dto![small_text,   "SM_TXT"];
-
-        Ok(dto)
-    }
-
     pub fn apply_to_activity(self, activity: Activity) -> Activity {
         let mut a = activity;
         let dto = &self;
@@ -137,5 +83,79 @@ impl ActivityDto {
         });
 
         a
+    }
+
+    pub fn from_flags(flags: DtoFlags) -> Result<Self, AppError> {
+        let start = match &flags.start {
+            Some(s) => Some(time_diff::hms_to_u64_fwd(s.as_ref())?),
+            None => None
+        };
+
+        let end = match &flags.end {
+            Some(e) => Some(time_diff::hms_to_u64_rvs(e.as_ref())?),
+            None => None
+        };
+
+        Ok(ActivityDto {
+            details: flags.details,
+            state: flags.state,
+            large_image: flags.lg_img,
+            small_image: flags.sm_img,
+            large_text: flags.lg_txt,
+            small_text: flags.sm_txt,
+            start,
+            start_hms: flags.start,
+            end,
+            end_hms: flags.end,
+        })
+    }
+
+    pub fn from_preset(p: Preset) -> Result<ActivityDto, AppError> {
+        let start = match &p.start {
+            Some(t) => Some(time_diff::hms_to_u64_rvs(t)?),
+            None => None,
+        };
+        let end = match &p.end {
+            Some(t) => Some(time_diff::hms_to_u64_fwd(t)?),
+            None => None,
+        };
+
+        Ok(ActivityDto {
+            details: p.details,
+            state: p.state,
+            large_image: p.large_image,
+            small_image: p.small_image,
+            large_text: p.large_text,
+            small_text: p.small_text,
+            start,
+            start_hms: p.start,
+            end,
+            end_hms: p.end,
+        })
+    }
+
+    pub fn empty_ref() -> &'static ActivityDto { &EMPTY }
+}
+
+impl AddAssign for ActivityDto {
+    fn add_assign(&mut self, rhs: ActivityDto) {
+        macro_rules! if_some_overwrite {
+            ($field:ident) => {
+                if let Some(x) = rhs.$field {
+                    self.$field = Some(x);
+                }
+            };
+        }
+
+        if_some_overwrite!(details);
+        if_some_overwrite!(state);
+        if_some_overwrite!(large_image);
+        if_some_overwrite!(small_image);
+        if_some_overwrite!(large_text);
+        if_some_overwrite!(small_text);
+        if_some_overwrite!(start);
+        if_some_overwrite!(start_hms);
+        if_some_overwrite!(end);
+        if_some_overwrite!(end_hms);
     }
 }

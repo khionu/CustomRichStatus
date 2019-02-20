@@ -1,30 +1,19 @@
-use clap::ArgMatches;
+use crate::{
+    state::app_state::State,
+    utils::fail::AppError,
+};
 
-use command_engine::command::Command;
-use models::dto::ActivityDto;
-use state::app_state::State;
-use utils::gnr_error::{GnrError, Handling};
-
-const SUCCESSFULLY_CLEARED: &str = "Status successfully cleared";
-const FAILED_TO_CLEAR: &str = "Failed to clear status";
+const SUCCESS: &str = "Status successfully cleared";
 
 pub struct ClearCmd;
 
-impl Command for ClearCmd {
-    type CmdArgs = ();
+impl ClearCmd {
+    pub fn run(state: &mut State) -> Result<String, AppError> {
+        state.current_status = None;
 
-    fn parse(_matches: &ArgMatches, _state: &State) -> Result<Self::CmdArgs, Box<GnrError>> {
-        Ok(())
-    }
-
-    fn run(_blank: Self::CmdArgs, state: &mut State) -> Result<String, Box<GnrError>> {
-        state.current_state = Some(ActivityDto::default());
-
-        match state.rpc.set_activity(|a| ActivityDto::default().apply_to_activity(a)) {
-            Ok(_p) => Ok(String::from(SUCCESSFULLY_CLEARED)),
-            Err(err) => Err(
-                GnrError::new_with_cause(FAILED_TO_CLEAR, Handling::Print, err)
-            ),
+        match state.rpc.clear_activity() {
+            Ok(_p) => Ok(String::from(SUCCESS)),
+            Err(err) => Err(err.into()),
         }
     }
 }
